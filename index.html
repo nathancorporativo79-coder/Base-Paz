@@ -1855,17 +1855,37 @@ const client = supabase.createClient(
   supabaseKey
 )
 
-async function teste() {
+async function salvarTeste() {
+
+  const { data, error } = await client
+    .from('usuarios')
+    .insert([
+      {
+        nome: 'Nathan Teste'
+      }
+    ])
+
+  console.log('SALVAR:', data)
+  console.log('ERRO SALVAR:', error)
+
+}
+
+async function buscarTeste() {
 
   const { data, error } = await client
     .from('usuarios')
     .select('*')
 
-  console.log(data)
-  console.log(error)
+  console.log('BUSCAR:', data)
+  console.log('ERRO BUSCAR:', error)
+
 }
 
-teste()
+salvarTeste()
+
+setTimeout(() => {
+  buscarTeste()
+}, 2000)
 
 </script>
 </body>
