@@ -1860,13 +1860,26 @@ z-index:99999;
   background:white;
   padding:30px;
   border-radius:12px;
-  width:320px;
+  width:340px;
   box-shadow:0 0 20px rgba(0,0,0,0.3);
   ">
 
     <h2 style="margin-bottom:20px;">
-      Acesso ao Sistema
+      Sistema Multiusuário
     </h2>
+
+    <input
+      id="nome"
+      type="text"
+      placeholder="Nome"
+      style="
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      "
+    >
 
     <input
       id="email"
@@ -1895,11 +1908,27 @@ z-index:99999;
     >
 
     <button
-      onclick="login()"
+      onclick="cadastro()"
       style="
       width:100%;
       padding:12px;
       margin-top:15px;
+      background:#00B4CC;
+      color:white;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      "
+    >
+      Criar Conta
+    </button>
+
+    <button
+      onclick="login()"
+      style="
+      width:100%;
+      padding:12px;
+      margin-top:10px;
       background:#0A3D6B;
       color:white;
       border:none;
@@ -1911,20 +1940,28 @@ z-index:99999;
     </button>
 
     <button
-      onclick="cadastro()"
+      onclick="logout()"
       style="
       width:100%;
       padding:12px;
       margin-top:10px;
-      background:#00B4CC;
+      background:#c0392b;
       color:white;
       border:none;
       border-radius:8px;
       cursor:pointer;
       "
     >
-      Criar Conta
+      Sair
     </button>
+
+    <div id="usuarioInfo"
+    style="
+    margin-top:20px;
+    font-size:14px;
+    color:#555;
+    ">
+    </div>
 
   </div>
 
@@ -1952,6 +1989,55 @@ const client = supabase.createClient(
 
 
 //═══════════════════════════════════════
+// CADASTRO
+//═══════════════════════════════════════
+
+async function cadastro(){
+
+  const nome = document.getElementById('nome').value
+
+  const email = document.getElementById('email').value
+
+  const senha = document.getElementById('senha').value
+
+  const { data, error } = await client.auth.signUp({
+    email,
+    password: senha
+  })
+
+  if(error){
+
+    alert(error.message)
+
+    return
+  }
+
+  // salva usuário na tabela usuarios
+  const { error: erroTabela } = await client
+    .from('usuarios')
+    .insert([
+      {
+        id: data.user.id,
+        nome: nome,
+        email: email,
+        cargo: 'usuario'
+      }
+    ])
+
+  if(erroTabela){
+
+    console.log(erroTabela)
+
+    alert('Conta criada, mas houve erro ao salvar perfil')
+
+    return
+  }
+
+  alert('Conta criada com sucesso')
+}
+
+
+//═══════════════════════════════════════
 // LOGIN
 //═══════════════════════════════════════
 
@@ -1973,35 +2059,9 @@ async function login(){
     return
   }
 
-  document.getElementById('loginBox').style.display = 'none'
+  alert('Login realizado')
 
-  alert('Login realizado com sucesso')
-}
-
-
-//═══════════════════════════════════════
-// CADASTRO
-//═══════════════════════════════════════
-
-async function cadastro(){
-
-  const email = document.getElementById('email').value
-
-  const senha = document.getElementById('senha').value
-
-  const { error } = await client.auth.signUp({
-    email,
-    password: senha
-  })
-
-  if(error){
-
-    alert(error.message)
-
-    return
-  }
-
-  alert('Conta criada com sucesso')
+  verificarLogin()
 }
 
 
@@ -2019,7 +2079,7 @@ async function verificarLogin(){
 
     document.getElementById('loginBox').style.display = 'none'
 
-    console.log('Usuário logado:', user.email)
+    carregarDadosUsuario(user.id)
 
   }else{
 
@@ -2027,7 +2087,42 @@ async function verificarLogin(){
   }
 }
 
-verificarLogin()
+
+//═══════════════════════════════════════
+// DADOS USUÁRIO
+//═══════════════════════════════════════
+
+async function carregarDadosUsuario(userId){
+
+  const { data, error } = await client
+    .from('usuarios')
+    .select('*')
+    .eq('id', userId)
+    .single()
+
+  if(error){
+
+    console.log(error)
+
+    return
+  }
+
+  console.log('USUÁRIO:', data)
+
+  console.log('CARGO:', data.cargo)
+
+  document.getElementById('usuarioInfo').innerHTML = `
+    <strong>${data.nome}</strong><br>
+    ${data.email}<br>
+    Cargo: ${data.cargo}
+  `
+
+  // exemplo de admin
+  if(data.cargo === 'admin'){
+
+    console.log('Administrador logado')
+  }
+}
 
 
 //═══════════════════════════════════════
@@ -2040,6 +2135,13 @@ async function logout(){
 
   location.reload()
 }
+
+
+//═══════════════════════════════════════
+// INICIALIZAÇÃO
+//═══════════════════════════════════════
+
+verificarLogin()
 
 </script>
 </body>
