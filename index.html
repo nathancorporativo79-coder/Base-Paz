@@ -1842,5 +1842,31 @@ function rendAuditoria(){
   setInterval(verificarLembretes,60000);
 })();
 </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+
+const supabaseUrl = 'https://viiijsatblpelqxvrnsx.supabase.co'
+
+const supabaseKey = 'sb_publishable_oNBQWg-7MAGexA5Qi2nJhw_w4MFD_Py'
+
+const supabase = window.supabase.createClient(
+  supabaseUrl,
+  supabaseKey
+)
+
+async function teste() {
+
+  const { data, error } = await supabase
+    .from('usuarios')
+    .select('*')
+
+  console.log(data)
+  console.log(error)
+}
+
+teste()
+
+</script>
 </body>
 </html>
