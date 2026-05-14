@@ -1842,6 +1842,205 @@ function rendAuditoria(){
   setInterval(verificarLembretes,60000);
 })();
 </script>
-status
+<!-- LOGIN MODAL -->
+<div id="loginBox" style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#000000cc;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:99999;
+">
+
+  <div style="
+  background:white;
+  padding:30px;
+  border-radius:12px;
+  width:320px;
+  box-shadow:0 0 20px rgba(0,0,0,0.3);
+  ">
+
+    <h2 style="margin-bottom:20px;">
+      Acesso ao Sistema
+    </h2>
+
+    <input
+      id="email"
+      type="email"
+      placeholder="Email"
+      style="
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      "
+    >
+
+    <input
+      id="senha"
+      type="password"
+      placeholder="Senha"
+      style="
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      "
+    >
+
+    <button
+      onclick="login()"
+      style="
+      width:100%;
+      padding:12px;
+      margin-top:15px;
+      background:#0A3D6B;
+      color:white;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      "
+    >
+      Entrar
+    </button>
+
+    <button
+      onclick="cadastro()"
+      style="
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      background:#00B4CC;
+      color:white;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      "
+    >
+      Criar Conta
+    </button>
+
+  </div>
+
+</div>
+
+
+
+<!-- SUPABASE -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<script>
+
+//═══════════════════════════════════════
+// CONFIGURAÇÃO SUPABASE
+//═══════════════════════════════════════
+
+const supabaseUrl = 'https://viiijsatblpelqxvrnsx.supabase.co'
+
+const supabaseKey = 'SUA_CHAVE_SUPABASE'
+
+const client = supabase.createClient(
+  supabaseUrl,
+  supabaseKey
+)
+
+
+//═══════════════════════════════════════
+// LOGIN
+//═══════════════════════════════════════
+
+async function login(){
+
+  const email = document.getElementById('email').value
+
+  const senha = document.getElementById('senha').value
+
+  const { error } = await client.auth.signInWithPassword({
+    email,
+    password: senha
+  })
+
+  if(error){
+
+    alert(error.message)
+
+    return
+  }
+
+  document.getElementById('loginBox').style.display = 'none'
+
+  alert('Login realizado com sucesso')
+}
+
+
+//═══════════════════════════════════════
+// CADASTRO
+//═══════════════════════════════════════
+
+async function cadastro(){
+
+  const email = document.getElementById('email').value
+
+  const senha = document.getElementById('senha').value
+
+  const { error } = await client.auth.signUp({
+    email,
+    password: senha
+  })
+
+  if(error){
+
+    alert(error.message)
+
+    return
+  }
+
+  alert('Conta criada com sucesso')
+}
+
+
+//═══════════════════════════════════════
+// VERIFICAR LOGIN
+//═══════════════════════════════════════
+
+async function verificarLogin(){
+
+  const {
+    data: { user }
+  } = await client.auth.getUser()
+
+  if(user){
+
+    document.getElementById('loginBox').style.display = 'none'
+
+    console.log('Usuário logado:', user.email)
+
+  }else{
+
+    document.getElementById('loginBox').style.display = 'flex'
+  }
+}
+
+verificarLogin()
+
+
+//═══════════════════════════════════════
+// LOGOUT
+//═══════════════════════════════════════
+
+async function logout(){
+
+  await client.auth.signOut()
+
+  location.reload()
+}
+
+</script>
 </body>
 </html>
